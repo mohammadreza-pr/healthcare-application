@@ -1,24 +1,34 @@
 from pydantic import EmailStr
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import Field, Relationship, SQLModel, JSON
+from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy import Column, String
+from enum import Enum
+from typing import Optional, List
+
+
+class Gender(Enum):
+    MALE = "male",
+    FEMALE = "female"
 
 
 # Shared properties
 class UserBase(SQLModel):
-    email: EmailStr = Field(unique=True, index=True, max_length=255)
-    is_active: bool = True
-    is_superuser: bool = False
+    phone_number: str = Field(unique=True, index=True, max_length=11)
     full_name: str | None = Field(default=None, max_length=255)
+    national_id: str = Field(unique=True)
 
 
-# Properties to receive via API on creation
-class UserCreate(UserBase):
+class UserRegister(UserBase):
     password: str = Field(min_length=8, max_length=40)
-
-
-class UserRegister(SQLModel):
-    email: EmailStr = Field(max_length=255)
-    password: str = Field(min_length=8, max_length=40)
-    full_name: str | None = Field(default=None, max_length=255)
+    gender: str
+    birth_date: str
+    height: int
+    weight: int
+    sickness: str
+    sickness_history: Optional[List[str]] = Field(sa_column=Column(ARRAY(String)))
+    family_sickness_history: Optional[List[str]] = Field(sa_column=Column(ARRAY(String)))
+    medicines: Optional[List[str]] = Field(sa_column=Column(ARRAY(String)))
+    allergies: Optional[List[str]] = Field(sa_column=Column(ARRAY(String)))
 
 
 # Properties to receive via API on update, all are optional
@@ -37,11 +47,14 @@ class UpdatePassword(SQLModel):
     new_password: str = Field(min_length=8, max_length=40)
 
 
+class UserCreate(UserBase):
+    password: str = Field(min_length=8, max_length=40)
+
+
 # Database model, database table inferred from class name
-class User(UserBase, table=True):
+class User(UserRegister, table=True):
     id: int | None = Field(default=None, primary_key=True)
     hashed_password: str
-    items: list["Item"] = Relationship(back_populates="owner")
 
 
 # Properties to return via API, id is always required
@@ -75,7 +88,6 @@ class Item(ItemBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     title: str = Field(max_length=255)
     owner_id: int | None = Field(default=None, foreign_key="user.id", nullable=False)
-    owner: User | None = Relationship(back_populates="items")
 
 
 # Properties to return via API, id is always required

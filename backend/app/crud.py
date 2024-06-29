@@ -3,7 +3,7 @@ from typing import Any
 from sqlmodel import Session, select
 
 from app.core.security import get_password_hash, verify_password
-from app.models import Item, ItemCreate, User, UserCreate, UserUpdate
+from app.models import Item, ItemCreate, User, UserCreate, UserUpdate, UserRegister
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
@@ -14,6 +14,14 @@ def create_user(*, session: Session, user_create: UserCreate) -> User:
     session.commit()
     session.refresh(db_obj)
     return db_obj
+
+
+def register_new_user(*, session: Session, user_register: UserRegister):
+    db_user = User.model_validate(user_register, update={"hashed_password": get_password_hash(user_register.password)})
+    session.add(db_user)
+    session.commit()
+    session.refresh(db_user)
+    return db_user
 
 
 def update_user(*, session: Session, db_user: User, user_in: UserUpdate) -> Any:
@@ -34,6 +42,11 @@ def get_user_by_email(*, session: Session, email: str) -> User | None:
     statement = select(User).where(User.email == email)
     session_user = session.exec(statement).first()
     return session_user
+
+
+def get_user_by_phone(*, session: Session, phone_number: str) -> User | None:
+    db_user = session.exec(select(User).where(User.phone_number == phone_number)).first()
+    return db_user
 
 
 def authenticate(*, session: Session, email: str, password: str) -> User | None:
