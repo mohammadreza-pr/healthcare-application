@@ -49,8 +49,8 @@ def get_user_by_phone(*, session: Session, phone_number: str) -> User | None:
     return db_user
 
 
-def authenticate(*, session: Session, email: str, password: str) -> User | None:
-    db_user = get_user_by_email(session=session, email=email)
+def authenticate(*, session: Session, phone_number: str, password: str) -> User | None:
+    db_user = get_user_by_phone(session=session, phone_number=phone_number)
     if not db_user:
         return None
     if not verify_password(password, db_user.hashed_password):
