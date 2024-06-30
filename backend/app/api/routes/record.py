@@ -1,12 +1,12 @@
 from fastapi import APIRouter, HTTPException
 from app.api.deps import SessionDep, CurrentUser
-from app.models import PublicRecord, CreateRecord, Record
+from app.models import PublicRecord, CreateRecord, Record, Records
 from app import crud
 
 router = APIRouter()
 
 
-@router.get("/", response_model=PublicRecord)
+@router.get("/", response_model=Records)
 async def get_user_records(
         session: SessionDep,
         skip: int,

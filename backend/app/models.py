@@ -32,13 +32,13 @@ class UserRegister(UserBase):
 
 
 class Record(SQLModel, table=True):
-    id: str | None = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     heart_rate: int
     body_temperature: int
     SPO2: int
     blood_pressure: int
     ECG: int
-    device_id: int
+    device_id: str
 
 
 # Properties to receive via API on update, all are optional
@@ -48,8 +48,7 @@ class UserUpdate(UserBase):
 
 
 class UserUpdateMe(SQLModel):
-    full_name: str | None = Field(default=None, max_length=255)
-    email: EmailStr | None = Field(default=None, max_length=255)
+    device_id: str
 
 
 class UpdatePassword(SQLModel):
@@ -65,7 +64,7 @@ class UserCreate(UserBase):
 class User(UserRegister, table=True):
     id: int | None = Field(default=None, primary_key=True)
     hashed_password: str
-    device_id: str
+    device_id: str | None = Field(default=None)
 
 
 # Properties to return via API, id is always required
