@@ -4,6 +4,7 @@ from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy import Column, String
 from enum import Enum
 from typing import Optional, List
+from datetime import datetime
 
 
 class Gender(Enum):
@@ -29,16 +30,6 @@ class UserRegister(UserBase):
     family_sickness_history: Optional[List[str]] = Field(sa_column=Column(ARRAY(String)))
     medicines: Optional[List[str]] = Field(sa_column=Column(ARRAY(String)))
     allergies: Optional[List[str]] = Field(sa_column=Column(ARRAY(String)))
-
-
-class Record(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    heart_rate: int
-    body_temperature: int
-    SPO2: int
-    blood_pressure: int
-    ECG: int
-    device_id: str
 
 
 # Properties to receive via API on update, all are optional
@@ -132,12 +123,31 @@ class NewPassword(SQLModel):
     new_password: str = Field(min_length=8, max_length=40)
 
 
+class RecordType(str, Enum):
+    VIDEO = "video"
+    SOUND = "sound"
+    MOTION = "motion"
+    ECG = "ecg"
+    ORT = "ort"
+
+
 class PublicRecord(SQLModel):
-    heart_rate: int
-    body_temperature: int
-    SPO2: int
-    blood_pressure: int
-    ECG: int
+    heart_rate: int | None = Field(default=None)
+    body_temperature: int | None = Field(default=None)
+    SPO2: int | None = Field(default=None)
+    blood_pressure: int | None = Field(default=None)
+    ECG: str | None = Field(default=None)
+    # video_file:
+    # sound_file:
+    ADXL: str | None = Field(default=None)
+    gps: str | None = Field(default=None)
+
+
+class Record(PublicRecord, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    device_id: str | None = Field(default=None, index=True)
+    created_at: datetime = Field(default_factory=lambda: datetime.now())
+    record_type: RecordType
 
 
 class Records(SQLModel):
