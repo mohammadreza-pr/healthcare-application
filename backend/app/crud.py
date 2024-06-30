@@ -1,9 +1,9 @@
 from typing import Any
 
-from sqlmodel import Session, select
+from sqlmodel import Session, select, func
 
 from app.core.security import get_password_hash, verify_password
-from app.models import Item, ItemCreate, User, UserCreate, UserUpdate, UserRegister
+from app.models import Item, ItemCreate, User, UserCreate, UserUpdate, UserRegister, Record, Records
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
@@ -64,3 +64,21 @@ def create_item(*, session: Session, item_in: ItemCreate, owner_id: int) -> Item
     session.commit()
     session.refresh(db_item)
     return db_item
+
+
+def get_user_records(*, session: Session, skip: int, limit: int, current_user: User):
+    device_id = current_user.device_id
+    count_statement = (
+        select(func.count())
+        .select_from(Record)
+        .where(Record.device_id == device_id)
+    )
+    count = session.exec(count_statement).one()
+    statement = (
+        select(Record)
+        .where(Record.device_id == device_id)
+        .offset(skip)
+        .limit(limit)
+    )
+    records = session.exec(statement).all()
+    return Records(data=records, count=count)

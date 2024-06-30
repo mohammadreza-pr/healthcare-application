@@ -31,6 +31,16 @@ class UserRegister(UserBase):
     allergies: Optional[List[str]] = Field(sa_column=Column(ARRAY(String)))
 
 
+class Record(SQLModel, table=True):
+    id: str | None = Field(default=None, primary_key=True)
+    heart_rate: int
+    body_temperature: int
+    SPO2: int
+    blood_pressure: int
+    ECG: int
+    device_id: int
+
+
 # Properties to receive via API on update, all are optional
 class UserUpdate(UserBase):
     email: EmailStr | None = Field(default=None, max_length=255)  # type: ignore
@@ -55,6 +65,7 @@ class UserCreate(UserBase):
 class User(UserRegister, table=True):
     id: int | None = Field(default=None, primary_key=True)
     hashed_password: str
+    device_id: str
 
 
 # Properties to return via API, id is always required
@@ -120,3 +131,20 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=40)
+
+
+class PublicRecord(SQLModel):
+    heart_rate: int
+    body_temperature: int
+    SPO2: int
+    blood_pressure: int
+    ECG: int
+
+
+class Records(SQLModel):
+    data: list[PublicRecord]
+    count: int
+
+
+class CreateRecord(PublicRecord):
+    device_id: str
