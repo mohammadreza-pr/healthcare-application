@@ -1,6 +1,6 @@
 from typing import Any
 
-from sqlmodel import Session, select, func, desc
+from sqlmodel import Session, select, func, desc, or_
 
 from app.core.security import get_password_hash, verify_password
 from app.models import Item, ItemCreate, User, UserCreate, UserUpdate, UserRegister, Record, Records, RecordType
@@ -46,6 +46,11 @@ def get_user_by_email(*, session: Session, email: str) -> User | None:
 
 def get_user_by_phone(*, session: Session, phone_number: str) -> User | None:
     db_user = session.exec(select(User).where(User.phone_number == phone_number)).first()
+    return db_user
+
+
+def get_user_by_national_id(*, session: Session, national_id: str) -> User | None:
+    db_user = session.exec(select(User).where(User.national_id == national_id)).first()
     return db_user
 
 

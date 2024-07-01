@@ -76,7 +76,7 @@ router = APIRouter()
 
 @router.patch("/me", response_model=UserPublic)
 def update_user_me(
-    *, session: SessionDep, user_in: UserUpdateMe, current_user: CurrentUser
+        *, session: SessionDep, user_in: UserUpdateMe, current_user: CurrentUser
 ) -> Any:
     """
     Update own user.
@@ -92,7 +92,7 @@ def update_user_me(
 
 @router.patch("/me/password", response_model=Message)
 def update_password_me(
-    *, session: SessionDep, body: UpdatePassword, current_user: CurrentUser
+        *, session: SessionDep, body: UpdatePassword, current_user: CurrentUser
 ) -> Any:
     """
     Update own password.
@@ -158,16 +158,15 @@ def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
 async def register_new_user(
         session: SessionDep, body: UserRegister
 ):
-    user = crud.get_user_by_phone(session=session, phone_number=body.phone_number)
-    if user:
+    user_temp_1 = crud.get_user_by_phone(session=session, phone_number=body.phone_number)
+    user_temp_2 = crud.get_user_by_national_id(session=session, national_id=body.national_id)
+    if user_temp_1 or user_temp_2:
         raise HTTPException(
             status_code=400,
             detail="The user already exists"
         )
     user = crud.register_new_user(session=session, user_register=body)
     return user
-
-
 
 # @router.get("/{user_id}", response_model=UserPublic)
 # def read_user_by_id(
