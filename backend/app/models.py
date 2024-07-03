@@ -7,7 +7,7 @@ from typing import Optional, List
 from datetime import datetime
 
 
-class Gender(Enum):
+class Gender(str, Enum):
     MALE = "male",
     FEMALE = "female"
 
@@ -17,19 +17,26 @@ class UserBase(SQLModel):
     phone_number: str = Field(unique=True, index=True, max_length=11)
     full_name: str | None = Field(default=None, max_length=255)
     national_id: str = Field(unique=True)
+    gender: Gender
+    birth_date: str
+    city: str
+    height: int
+    weight: int
 
 
 class UserRegister(UserBase):
-    password: str = Field(min_length=8, max_length=40)
-    gender: str
-    birth_date: str
-    height: int
-    weight: int
     sickness: str
+    password: str = Field(min_length=8, max_length=40)
     sickness_history: Optional[List[str]] = Field(sa_column=Column(ARRAY(String)))
     family_sickness_history: Optional[List[str]] = Field(sa_column=Column(ARRAY(String)))
     medicines: Optional[List[str]] = Field(sa_column=Column(ARRAY(String)))
     allergies: Optional[List[str]] = Field(sa_column=Column(ARRAY(String)))
+
+
+class User(UserRegister, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    hashed_password: str
+    device_id: str | None = Field(default=None)
 
 
 # Properties to receive via API on update, all are optional
@@ -52,15 +59,11 @@ class UserCreate(UserBase):
 
 
 # Database model, database table inferred from class name
-class User(UserRegister, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    hashed_password: str
-    device_id: str | None = Field(default=None)
 
 
 # Properties to return via API, id is always required
-class UserPublic(UserBase):
-    id: int
+class UserPublic(UserRegister):
+    id: str
 
 
 class UsersPublic(SQLModel):

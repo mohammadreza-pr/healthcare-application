@@ -16,6 +16,7 @@ from app.models import (
     Message,
     UpdatePassword,
     User,
+    UserBase,
     UserCreate,
     UserPublic,
     UserRegister,
@@ -110,7 +111,7 @@ def update_password_me(
     return Message(message="Password updated successfully")
 
 
-@router.get("/me", response_model=UserPublic)
+@router.get("/me", response_model=UserBase)
 def read_user_me(current_user: CurrentUser) -> Any:
     """
     Get current user.
