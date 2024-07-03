@@ -75,7 +75,7 @@ router = APIRouter()
 #     return user
 
 
-@router.patch("/me", response_model=UserPublic)
+@router.patch("/me", response_model=UserBase)
 def update_user_me(
         *, session: SessionDep, user_in: UserUpdateMe, current_user: CurrentUser
 ) -> Any:
@@ -155,7 +155,7 @@ def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
 #     user = crud.create_user(session=session, user_create=user_create)
 #     return user
 
-@router.post('/signup', response_model=UserPublic)
+@router.post('/signup', response_model=UserBase)
 async def register_new_user(
         session: SessionDep, body: UserRegister
 ):
